@@ -10,6 +10,10 @@ namespace FileExplore2
         DirectoryInfo currentDir;
         private string currentPath = "My Computer";
 
+        private string sourcePath = "";
+        private string targetPath = "";
+        private string fileCpy = "";
+
         public Form1()
         {
             InitializeComponent();
@@ -20,7 +24,6 @@ namespace FileExplore2
             initDriveInfo();
         }
 
-        //init drive first time
         public void initDriveInfo()
         {
             pathTextBox.Text = currentPath;
@@ -35,30 +38,6 @@ namespace FileExplore2
             }
         }
 
-        // action after select drive from treeview
-        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
-        {
-            TreeNode selectedNode = treeView1.SelectedNode;
-
-            try
-            {
-                if (selectedNode.Tag.GetType() == typeof(DirectoryInfo))
-                {
-                    selectedNode.Nodes.Clear();
-
-                    setCurrentDir((DirectoryInfo)selectedNode.Tag);
-
-                    ShowDirectory();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("cannot open drive");
-                Console.WriteLine(ex.ToString());
-            }
-        }
-
-        //open directory
         private void ShowDirectory()
         {
             listView2.Items.Clear();
@@ -97,6 +76,35 @@ namespace FileExplore2
             }
         }
 
+        private void resetCopyPath()
+        {
+            sourcePath = "";
+            targetPath = "";
+            fileCpy = "";
+        }
+
+        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            TreeNode selectedNode = treeView1.SelectedNode;
+
+            try
+            {
+                if (selectedNode.Tag.GetType() == typeof(DirectoryInfo))
+                {
+                    selectedNode.Nodes.Clear();
+
+                    setCurrentDir((DirectoryInfo)selectedNode.Tag);
+
+                    ShowDirectory();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("cannot open drive");
+                Console.WriteLine(ex.ToString());
+            }
+        }
+
         private void listView2_ItemActivate(object sender, EventArgs e)
         {
             try
@@ -122,13 +130,6 @@ namespace FileExplore2
             }
         }
 
-        private void setCurrentDir(DirectoryInfo input)
-        {
-            currentDir = input;
-            currentPath = currentDir.FullName;
-            pathTextBox.Text = currentPath;
-        }
-
         private void backBtn_Click(object sender, EventArgs e)
         {
             string path = pathTextBox.Text;
@@ -143,28 +144,39 @@ namespace FileExplore2
             {
                 contextMenuStrip1.Items[0].Enabled = false; //Open
                 contextMenuStrip1.Items[1].Enabled = false; //Rename
-                contextMenuStrip1.Items[3].Enabled = false; //Copy
+                contextMenuStrip1.Items[2].Enabled = false; //Copy
+                if (sourcePath != null && targetPath != null)
+                {
+                    contextMenuStrip1.Items[3].Enabled = true;
+
+                }
+                else
+                {
+                    contextMenuStrip1.Items[3].Enabled = false;
+                }
                 contextMenuStrip1.Items[4].Enabled = false; //Move
                 contextMenuStrip1.Items[5].Enabled = false; //Delete
-                //contextMenuStrip1.Items[7].Enabled = true;  //New Folder
+                contextMenuStrip1.Items[6].Enabled = true;  //New Folder
             }
             else if (listView2.SelectedIndices.Count == 1)
             {
                 contextMenuStrip1.Items[0].Enabled = true;
                 contextMenuStrip1.Items[1].Enabled = true;
-                contextMenuStrip1.Items[3].Enabled = true;
+                contextMenuStrip1.Items[2].Enabled = true;
+                contextMenuStrip1.Items[3].Enabled = false; //Paste
                 contextMenuStrip1.Items[4].Enabled = true;
                 contextMenuStrip1.Items[5].Enabled = true;
-                //contextMenuStrip1.Items[7].Enabled = false;
+                contextMenuStrip1.Items[6].Enabled = false;
             }
             else
             {
                 contextMenuStrip1.Items[0].Enabled = false;
                 contextMenuStrip1.Items[1].Enabled = false;
-                contextMenuStrip1.Items[3].Enabled = true;
+                contextMenuStrip1.Items[2].Enabled = true;
+                contextMenuStrip1.Items[3].Enabled = false;
                 contextMenuStrip1.Items[4].Enabled = true;
                 contextMenuStrip1.Items[5].Enabled = true;
-                //contextMenuStrip1.Items[7].Enabled = false;
+                contextMenuStrip1.Items[6].Enabled = false;
             }
         }
 
@@ -172,23 +184,121 @@ namespace FileExplore2
         {
             try
             {
-                string pathh = currentPath + listView2.SelectedItems[0].Text;
-                if (listView2.SelectedItems[0].Tag.GetType() == typeof(DirectoryInfo))
+                foreach (ListViewItem x in listView2.SelectedItems)
                 {
-                    Directory.Delete(pathh, true);
-                    ShowDirectory();
+                    string pathh = "";
+                    if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+                    {
+                        pathh = currentPath + "\\" + x.Text;
+                    }
+                    else
+                    {
+                        pathh = currentPath + x.Text;
+                    }
+
+                    if (x.Tag.GetType() == typeof(DirectoryInfo))
+                    {
+                        Directory.Delete(pathh, true);
+                    }
+                    else
+                    {
+                        File.Delete(pathh);
+                    }
                 }
-                else
-                {
-                    File.Delete(pathh);
-                    ShowDirectory();
-                }
+                ShowDirectory();
+
             }
             catch (Exception ex)
             {
                 MessageBox.Show("cannot delete");
                 Console.WriteLine(ex.ToString());
             }
+        }
+
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+            {
+                sourcePath = currentPath + "\\" + listView2.SelectedItems[0].Text;
+                fileCpy = listView2.SelectedItems[0].Text;
+            }
+            else
+            {
+                sourcePath = currentPath + listView2.SelectedItems[0].Text;
+                fileCpy = listView2.SelectedItems[0].Text;
+            }
+
+        }
+
+        private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // copy all directory
+                if (Directory.Exists(sourcePath))
+                {
+                    if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+                    {
+                        targetPath = currentPath + "\\" + fileCpy;
+                        Directory.CreateDirectory(targetPath);
+                    }
+                    else
+                    {
+                        targetPath = currentPath + fileCpy;
+                        Directory.CreateDirectory(targetPath);
+                    }
+
+                    foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+                    {
+                        Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+                    }
+
+                    //Copy all the files & Replaces any files with the same name
+                    foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+                    {
+                        File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+                    }
+
+                    ShowDirectory();
+                    resetCopyPath();
+                }
+                else
+                {
+                    // copy a file
+                    if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+                    {
+                        targetPath = currentPath + "\\" + fileCpy;
+                    }
+                    else
+                    {
+                        targetPath = currentPath + fileCpy;
+                    }
+
+                    File.Copy(sourcePath, targetPath, true);
+                    ShowDirectory();
+                    resetCopyPath();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("file has existed");
+                Console.WriteLine(ex.ToString());
+            }
+        }
+
+        private void setCurrentDir(DirectoryInfo input)
+        {
+            currentDir = input;
+            currentPath = currentDir.FullName;
+            pathTextBox.Text = currentPath;
+        }
+
+
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
