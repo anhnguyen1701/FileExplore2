@@ -10,9 +10,11 @@ namespace FileExplore2
         DirectoryInfo currentDir;
         private string currentPath = "My Computer";
 
+        private int status = 0; // status = 1 -> copy' status = 2 -> cut
         private string sourcePath = "";
         private string targetPath = "";
         private string fileCpy = "";
+
 
         public Form1()
         {
@@ -227,6 +229,7 @@ namespace FileExplore2
                 sourcePath = currentPath + listView2.SelectedItems[0].Text;
                 fileCpy = listView2.SelectedItems[0].Text;
             }
+            status = 1;
 
         }
 
@@ -234,56 +237,102 @@ namespace FileExplore2
         {
             try
             {
-                // copy all directory
-                if (Directory.Exists(sourcePath))
+                if (status == 1)
                 {
-                    if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+                    // copy all directory
+                    if (Directory.Exists(sourcePath))
                     {
-                        targetPath = currentPath + "\\" + fileCpy;
-                        Directory.CreateDirectory(targetPath);
+                        if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+                        {
+                            targetPath = currentPath + "\\" + fileCpy;
+                            Directory.CreateDirectory(targetPath);
+                        }
+                        else
+                        {
+                            targetPath = currentPath + fileCpy;
+                            Directory.CreateDirectory(targetPath);
+                        }
+
+                        foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+                        {
+                            Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+                        }
+
+                        //Copy all the files & Replaces any files with the same name
+                        foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+                        {
+                            File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+                        }
+
+                        ShowDirectory();
+                        resetCopyPath();
                     }
                     else
                     {
-                        targetPath = currentPath + fileCpy;
-                        Directory.CreateDirectory(targetPath);
-                    }
+                        // copy a file
+                        if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+                        {
+                            targetPath = currentPath + "\\" + fileCpy;
+                        }
+                        else
+                        {
+                            targetPath = currentPath + fileCpy;
+                        }
 
-                    foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
-                    {
-                        Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+                        File.Copy(sourcePath, targetPath, true);
+                        ShowDirectory();
+                        resetCopyPath();
                     }
-
-                    //Copy all the files & Replaces any files with the same name
-                    foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
-                    {
-                        File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
-                    }
-
-                    ShowDirectory();
-                    resetCopyPath();
                 }
-                else
+                else if (status == 2)
                 {
-                    // copy a file
-                    if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+                    if (Directory.Exists(sourcePath))
                     {
-                        targetPath = currentPath + "\\" + fileCpy;
+                        if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+                        {
+                            targetPath = currentPath + "\\" + fileCpy;
+                            Directory.CreateDirectory(targetPath);
+                        }
+                        else
+                        {
+                            targetPath = currentPath + fileCpy;
+                            Directory.CreateDirectory(targetPath);
+                        }
+
+                        DirectoryInfo sourceInfo = Directory.CreateDirectory(sourcePath);
+
+                        foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+                        {
+                            Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+                        }
+
+                        //Copy all the files & Replaces any files with the same name
+                        foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+                        {
+                            File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+                        }
+
+                        sourceInfo.Delete(true);
                     }
                     else
                     {
-                        targetPath = currentPath + fileCpy;
+                        if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+                        {
+                            targetPath = currentPath + "\\" + fileCpy;
+                        }
+                        else
+                        {
+                            targetPath = currentPath + fileCpy;
+                        }
+                        File.Move(sourcePath, targetPath);
                     }
 
-                    File.Copy(sourcePath, targetPath, true);
                     ShowDirectory();
-                    resetCopyPath();
                 }
-
             }
             catch (Exception ex)
             {
-                MessageBox.Show("file has existed");
-                Console.WriteLine(ex.ToString());
+                MessageBox.Show(ex.ToString());
             }
         }
 
@@ -299,6 +348,21 @@ namespace FileExplore2
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void moveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+            {
+                sourcePath = currentPath + "\\" + listView2.SelectedItems[0].Text;
+                fileCpy = listView2.SelectedItems[0].Text;
+            }
+            else
+            {
+                sourcePath = currentPath + listView2.SelectedItems[0].Text;
+                fileCpy = listView2.SelectedItems[0].Text;
+            }
+            status = 2;
         }
     }
 }
