@@ -125,7 +125,8 @@ namespace FileExplore2
         private void setCurrentDir(DirectoryInfo input)
         {
             currentDir = input;
-            pathTextBox.Text = currentDir.FullName;
+            currentPath = currentDir.FullName;
+            pathTextBox.Text = currentPath;
         }
 
         private void backBtn_Click(object sender, EventArgs e)
@@ -169,7 +170,25 @@ namespace FileExplore2
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
+            try
+            {
+                string pathh = currentPath + listView2.SelectedItems[0].Text;
+                if (listView2.SelectedItems[0].Tag.GetType() == typeof(DirectoryInfo))
+                {
+                    Directory.Delete(pathh, true);
+                    ShowDirectory();
+                }
+                else
+                {
+                    File.Delete(pathh);
+                    ShowDirectory();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("cannot delete");
+                Console.WriteLine(ex.ToString());
+            }
         }
     }
 }
