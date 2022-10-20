@@ -364,5 +364,10 @@ namespace FileExplore2
             }
             status = 2;
         }
+
+        private void folderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            
+        }
     }
 }
