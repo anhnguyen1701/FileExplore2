@@ -57,7 +57,7 @@ namespace FileExplore2
             {
                 ListViewItem item = listView2.Items.Add(file.Name);
                 item.Tag = file;
-                item.SubItems.Add(file.Length.ToString());
+                item.SubItems.Add(file.Length.ToString() + " bytes");
 
                 string fileExtension = file.Extension;
                 item.SubItems.Add(fileExtension);
