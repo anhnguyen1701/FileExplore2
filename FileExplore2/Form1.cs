@@ -367,37 +367,53 @@ namespace FileExplore2
 
         private void folderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string folderName = Path.GetRandomFileName();
 
-            if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+            try
             {
-                targetPath = currentPath + "\\" + folderName;
-                Directory.CreateDirectory(targetPath);
-                ShowDirectory();
+                string folderName = Path.GetRandomFileName();
+
+                if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+                {
+                    targetPath = currentPath + "\\" + folderName;
+                    Directory.CreateDirectory(targetPath);
+                    ShowDirectory();
+                }
+                else
+                {
+                    targetPath = currentPath + folderName;
+                    Directory.CreateDirectory(targetPath);
+                    ShowDirectory();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                targetPath = currentPath + folderName;
-                Directory.CreateDirectory(targetPath);
-                ShowDirectory();
+                MessageBox.Show(ex.ToString());
             }
         }
 
         private void fileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string fileName = Path.GetRandomFileName();
 
-            if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+            try
             {
-                targetPath = currentPath + "\\" + fileName;
-                File.Create(targetPath).Close();
-                ShowDirectory();
+                string fileName = Path.GetRandomFileName();
+
+                if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+                {
+                    targetPath = currentPath + "\\" + fileName;
+                    File.Create(targetPath).Close();
+                    ShowDirectory();
+                }
+                else
+                {
+                    targetPath = currentPath + fileName;
+                    File.Create(targetPath).Close();
+                    ShowDirectory();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                targetPath = currentPath + fileName;
-                File.Create(targetPath).Close();
-                ShowDirectory();
+                MessageBox.Show(ex.ToString());
             }
         }
     }
