@@ -347,7 +347,27 @@ namespace FileExplore2
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            try
+            {
+                if (listView2.SelectedItems[0].Tag.GetType() == typeof(DirectoryInfo))
+                {
+                    setCurrentDir((DirectoryInfo)listView2.SelectedItems[0].Tag);
 
+                    ShowDirectory();
+                }
+                else
+                {
+                    FileInfo file = (FileInfo)listView2.SelectedItems[0].Tag;
+
+                    //mo ung dung (doc ghi file)
+                    Process.Start(new ProcessStartInfo { FileName = file.FullName, UseShellExecute = true });
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("cannot open file");
+                Console.WriteLine(ex.ToString());
+            }
         }
 
         private void moveToolStripMenuItem_Click(object sender, EventArgs e)
