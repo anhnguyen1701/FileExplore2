@@ -147,7 +147,7 @@ namespace FileExplore2
                 contextMenuStrip1.Items[0].Enabled = false; //Open
                 contextMenuStrip1.Items[1].Enabled = false; //Rename
                 contextMenuStrip1.Items[2].Enabled = false; //Copy
-                if (sourcePath != null && targetPath != null)
+                if (sourcePath != "" && targetPath != "")
                 {
                     contextMenuStrip1.Items[3].Enabled = true;
 
@@ -367,7 +367,38 @@ namespace FileExplore2
 
         private void folderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
+            string folderName = Path.GetRandomFileName();
+
+            if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+            {
+                targetPath = currentPath + "\\" + folderName;
+                Directory.CreateDirectory(targetPath);
+                ShowDirectory();
+            }
+            else
+            {
+                targetPath = currentPath + folderName;
+                Directory.CreateDirectory(targetPath);
+                ShowDirectory();
+            }
+        }
+
+        private void fileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string fileName = Path.GetRandomFileName();
+
+            if (currentPath.Split("\\").Length >= 2 && currentPath.Split("\\")[1] != "")
+            {
+                targetPath = currentPath + "\\" + fileName;
+                File.Create(targetPath).Close();
+                ShowDirectory();
+            }
+            else
+            {
+                targetPath = currentPath + fileName;
+                File.Create(targetPath).Close();
+                ShowDirectory();
+            }
         }
     }
 }
