@@ -24,11 +24,13 @@ namespace FileExplore2
         private void Form1_Load(object sender, EventArgs e)
         {
             initDriveInfo();
+            pathTextBox.ReadOnly = true;
         }
 
         public void initDriveInfo()
         {
             pathTextBox.Text = currentPath;
+            searchTextBox.Text = "";
             foreach (DriveInfo drive in DriveInfo.GetDrives())
             {
                 TreeNode driveNode = new TreeNode(drive.Name);
@@ -341,6 +343,7 @@ namespace FileExplore2
             currentDir = input;
             currentPath = currentDir.FullName;
             pathTextBox.Text = currentPath;
+            searchTextBox.Text = "Search in " + currentPath;
         }
 
 
@@ -434,6 +437,54 @@ namespace FileExplore2
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void searchTextBox_Click(object sender, EventArgs e)
+        {
+            searchTextBox.Text = "";
+        }
+
+        private void btnSearch_Click(object sender, EventArgs e)
+        {
+            string s = searchTextBox.Text;
+
+            listView2.Items.Clear();
+            foreach (string dirPath in Directory.GetDirectories(currentPath, "*" + s + "*", SearchOption.TopDirectoryOnly))
+            {
+                DirectoryInfo dir = new DirectoryInfo(dirPath);
+
+                ListViewItem item = listView2.Items.Add(dir.Name);
+                item.Tag = dir;
+                item.ImageIndex = 2;
+                item.SubItems.Add("");
+                item.SubItems.Add("Folder");
+            }
+
+            foreach (string newPath in Directory.GetFiles(currentPath, "*" + s + "*", SearchOption.TopDirectoryOnly))
+            {
+                FileInfo file = new FileInfo(newPath);
+
+                ListViewItem item = listView2.Items.Add(file.Name);
+                item.Tag = file;
+                item.SubItems.Add(file.Length.ToString() + " bytes");
+
+                string fileExtension = file.Extension;
+                item.SubItems.Add(fileExtension);
+
+                switch (fileExtension.ToUpper())
+                {
+                    case ".EXE":
+                        item.ImageIndex = 0;
+                        break;
+                    case ".ZIP":
+                    case ".RAR":
+                        item.ImageIndex = 3;
+                        break;
+                    default:
+                        item.ImageIndex = 1;
+                        break;
+                }
             }
         }
     }
