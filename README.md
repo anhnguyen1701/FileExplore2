@@ -5,4 +5,4 @@ https://learn.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-2
 - done
 -- tao file/folder, xoa, mo, dong, doc ghi file, di chuyen, sao chep
 - todo
--- xem kich thuoc, tim kiem
+-- tim kiem
